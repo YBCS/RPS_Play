@@ -2,8 +2,8 @@
 
 /*
 Goals:
-    - [] detect game ends and stop loop
-    - [] add support for scissor
+    - [x] detect game ends and stop loop
+    - [x] add support for scissor
 */
 
 let agents = []
@@ -37,7 +37,7 @@ function setup() {
     for (let i = 0; i < numOfAgents; i++) {
         agents.push(new AgentGeneric('rock'))
         agents.push(new AgentGeneric('paper'))
-        // agents.push(new AgentGeneric("scissor"));
+        agents.push(new AgentGeneric('scissor'))
     }
 }
 
@@ -50,6 +50,11 @@ function draw() {
         agents[i].draw()
         agents[i].move()
         agents[i].boundary()
+    }
+    if (agents.every((agent) => agent.choice === agents[0].choice)) {
+        // alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
+        console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
+        noLoop()
     }
 }
 
@@ -147,6 +152,7 @@ class AgentGeneric extends Agent {
         }
     }
 
+    // I am sure there is a better way to do this
     collisionResolution(mine, their) {
         console.log('collision resolution called in subclass ', mine, their)
 
@@ -156,8 +162,22 @@ class AgentGeneric extends Agent {
 
         if (mine.choice === 'rock' && their.choice === 'paper') {
             // their wins
-            console.log('paper wins')
             mine.updateChoice('paper')
+        } else if (mine.choice === 'paper' && their.choice === 'rock') {
+            // mine wins
+            their.updateChoice('paper')
+        } else if (mine.choice === 'rock' && their.choice === 'scissor') {
+            // mine wins
+            their.updateChoice('rock')
+        } else if (mine.choice === 'scissor' && their.choice === 'rock') {
+            // their wins
+            mine.updateChoice('rock')
+        } else if (mine.choice === 'paper' && their.choice === 'scissor') {
+            // their wins
+            mine.updateChoice('scissor')
+        } else if (mine.choice === 'scissor' && their.choice === 'paper') {
+            // mine wins
+            their.updateChoice('scissor')
         }
         return
     }

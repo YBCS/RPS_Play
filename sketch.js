@@ -2,10 +2,8 @@
 
 /*
 Goals:
-    - [x] use rectangle instead of text
-    - [] try to use color
-    - [] detect collision correctly
-    - [] use image
+    - [] detect game ends and stop loop
+    - [] add support for scissor
 */
 
 let agents = [];
@@ -28,52 +26,31 @@ function preload() {
     scissor_sound = loadSound("assets/scissor_effect.mp3");
 }
 
+let agentRock;
+let agentPaper;
 function setup() {
 	rectMode(CENTER);
     imageMode(CENTER);
 	createCanvas(200, 200);
 	numOfAgents = 3;
 	for (let i = 0; i < numOfAgents; i++) {
-        rocks.push(new AgentRock());
-        papers.push(new AgentPaper());
-        // scissors.push(new AgentScissor());
+        agents.push(new AgentGeneric("rock"));
+        agents.push(new AgentGeneric("paper"));
+        // agents.push(new AgentGeneric("scissor"));
 	}
 }
 
 function draw() {
 	background(0);
-	// let x1 = mouseX;
-	// let y1 = mouseY;
-	// agent1 = new Agent(width/2, height/2);
-	// agent1.checkCollisions(agents);
-	// agent1.draw(-1); // order matters
 
-	// for (let i = 0; i < numOfAgents; i++) {
-	// 	agents[i].checkCollisions(agents);
-	// 	agents[i].draw(i);
-	// 	agents[i].move();
-	// 	agents[i].boundary();
-	// }
+    for (let i = 0; i < agents.length; i++) {
+		// order matters because we set highlight in checkCollisions. draw() is called after this
+		agents[i].checkCollisions(agents); 
+		agents[i].draw();
+		agents[i].move();
+		agents[i].boundary();
+	}
 
-    // for (let i = 0; i < numOfAgents; i++) {
-	// 	rocks[i].checkCollisions(papers);
-	// 	rocks[i].draw();
-	// 	rocks[i].move();
-	// 	rocks[i].boundary();
-    //     // papers[i].checkCollisions(rocks);
-	// 	papers[i].draw();
-	// 	papers[i].move();
-	// 	papers[i].boundary();
-	// }
-
-    agentRock = new AgentRock(mouseX, mouseY);
-    
-    agentPaper = new AgentPaper(width/2, height/2);
-    
-    agentRock.checkCollisions([agentPaper]);
-    agentPaper.checkCollisions([agentRock]);
-    agentRock.draw(1)
-    agentPaper.draw(2)
 }
 
 // base class for all agents -> 🤘 📰 ✂
@@ -86,10 +63,6 @@ class Agent {
 		this.highlight = false;
 		this.speedX = random(0.05, 1);
 		this.speedY = random(0.05, 1);
-	}
-
-	setHighlight(isHighlight) {
-		this.highlight = isHighlight;
 	}
 
 	draw(i) {
@@ -119,7 +92,7 @@ class Agent {
 		}
 	}
 
-	//
+	// checks if this agent intersects with another agent
 	intersects(other) {
 		let d = dist(this.x, this.y, other.x, other.y);
 		if (d < this.r) {
@@ -135,13 +108,63 @@ class Agent {
 			if (this !== others[i]) {
 				if (this.intersects(others[i])) {
 					this.highlight = true;
-                    console.log('collision ', this, others[i])
+                    // console.log('collision ', this, others[i])
+					this.collisionResolution(this, others[i]);
 				}
 			}
 		}
 	}
+
+	collisionResolution(mine, their) {
+		/* implements in subclass */ 
+		return
+	}
+
 }
 
+class AgentGeneric extends Agent {
+	constructor(choice, x = random(width - 20), y = random(height - 20)) {
+		super(x, y);
+		this.choice = choice; // rock, paper, scissor
+	}
+
+	updateChoice(choice) {
+		this.choice = choice;
+	}
+
+    draw() {
+		switch (this.choice) {
+			case "rock":
+				image(rock, this.x, this.y, this.r, this.r);
+				break;
+			case "paper":
+				image(paper, this.x, this.y, this.r, this.r);
+				break;
+			case "scissor":
+				image(scissor, this.x, this.y, this.r, this.r);
+				break;
+			default:
+				break;
+		}
+    }
+
+	collisionResolution(mine, their) {
+		console.log("collision resolution called in subclass ", mine, their);
+		
+		if (mine.choice === their.choice ) {
+			return
+		}
+		
+		if (mine.choice === "rock" && their.choice === "paper") {
+			// their wins
+			console.log("paper wins");
+			mine.updateChoice("paper");
+		}
+		return
+	}	
+}
+
+// these are not needed perhaps
 class AgentRock extends Agent {
 
     draw(i) {
@@ -155,23 +178,5 @@ class AgentRock extends Agent {
 		rect(this.x, this.y, this.r);
 
         image(rock, this.x, this.y, this.r, this.r);
-    }
-}
-class AgentPaper extends Agent {
-
-    draw(i) {
-        if (this.highlight) {
-            // make some noise 😁
-        }
-        image(paper, this.x, this.y, this.r, this.r);
-    }
-}
-class AgentScissor extends Agent {
-
-    draw(i) {
-        if (this.highlight) {
-            // make some noise 😁
-        }
-        image(scissor, this.x, this.y, this.r, this.r);
     }
 }

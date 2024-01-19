@@ -2,8 +2,7 @@
 
 /*
 Goals:
-    - [x] detect game ends and stop loop
-    - [x] add support for scissor
+    - [] figure out the sound
 */
 
 let agents = []
@@ -32,7 +31,7 @@ let agentPaper
 function setup() {
     rectMode(CENTER)
     imageMode(CENTER)
-    createCanvas(200, 200)
+    createCanvas(400, 400)
     numOfAgents = 3
     for (let i = 0; i < numOfAgents; i++) {
         agents.push(new AgentGeneric('rock'))
@@ -78,7 +77,7 @@ class Agent {
         }
         rect(this.x, this.y, this.r)
         stroke('black')
-        text('✂️', this.x, this.y) // order matters
+        text(str(i), this.x, this.y) // order matters
     }
 
     move() {

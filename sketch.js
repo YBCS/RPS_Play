@@ -11,6 +11,7 @@ let scissors = []
 let rock
 let paper
 let scissor
+let mask
 let rock_sound
 let paper_sound
 let scissor_sound
@@ -19,7 +20,7 @@ function preload() {
     rock = loadImage('assets/rock.png')
     paper = loadImage('assets/paper.png')
     scissor = loadImage('assets/scissor.png')
-
+    mask = loadImage('assets/performing-arts.png')
     // rock_sound = loadSound("assets/rock_effect.wav");
     // paper_sound = loadSound("assets/paper_effect.wav");
     // scissor_sound = loadSound("assets/scissor_effect.mp3");
@@ -38,6 +39,11 @@ function setup() {
         agents.push(new AgentGeneric('scissor'))
     }
 }
+
+/* for debugging */
+// function mouseClicked() {
+//     agents.push(new AgentGeneric('mask', mouseX, mouseY))
+// }
 
 function draw() {
     background(0)
@@ -59,13 +65,28 @@ function draw() {
 // base class for all agents -> 🤘 📰 ✂
 class Agent {
     constructor(x = random(width - 20), y = random(height - 20)) {
+        this.r = 20 // gets complicated if r is exposed
         this.x = x
         this.y = y
-        this.r = 20 // gets complicated if r is exposed
+
+        if (y < this.r) { // too close to the top panel
+            this.y = y + this.r
+        }
+        if (x < this.r) { // too close to the left panel
+            this.x = x + this.r
+        }
+        if (y > height - this.r) { // too close to the bottom panel
+            this.y = y - this.r
+        }
+        if (x > height - this.r) { // too close to the right panel
+            this.x = x - this.r
+        }
+
 
         this.highlight = false
-        this.speedX = random(0.05, 1)
-        this.speedY = random(0.05, 1)
+        let random_number = random([random(-2, -1), random(1, 2)])
+        this.speedX = random_number
+        this.speedY = random_number
     }
 
     draw(i) {
@@ -87,10 +108,10 @@ class Agent {
     boundary() {
         // bounce off the walls
 
-        if (this.x > width - this.r || this.x - this.r < 0) {
+        if (this.x > width - (this.r/2) || this.x - (this.r/2) < 0) {
             this.speedX *= -1
         }
-        if (this.y > height - this.r || this.y - this.r < 0) {
+        if (this.y > height - (this.r/2) || this.y - (this.r/2) < 0) {
             this.speedY *= -1
         }
     }
@@ -146,13 +167,14 @@ class AgentGeneric extends Agent {
                 image(scissor, this.x, this.y, this.r, this.r)
                 break
             default:
+                image(mask, this.x, this.y, this.r, this.r)
                 break
         }
     }
 
     // I am sure there is a better way to do this
     collisionResolution(mine, their) {
-        console.log('collision resolution called in subclass ', mine, their)
+        // console.log('collision resolution called in subclass ', mine, their)
 
         if (mine.choice === their.choice) {
             return

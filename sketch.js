@@ -2,7 +2,6 @@
 
 /*
 Goals:
-    - [] figure out the sound
 */
 
 let agents = []
@@ -179,21 +178,5 @@ class AgentGeneric extends Agent {
             their.updateChoice('scissor')
         }
         return
-    }
-}
-
-// these are not needed perhaps
-class AgentRock extends Agent {
-    draw(i) {
-        if (this.highlight) {
-            // fill(255, 100);
-            fill('red')
-        } else {
-            // fill("white");
-            fill('green')
-        }
-        rect(this.x, this.y, this.r)
-
-        image(rock, this.x, this.y, this.r, this.r)
     }
 }

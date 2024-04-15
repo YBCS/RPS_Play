@@ -26,8 +26,6 @@ function preload() {
   // scissor_sound = loadSound("assets/scissor_effect.mp3");
 }
 
-let agentRock
-let agentPaper
 function setup() {
   rectMode(CENTER)
   imageMode(CENTER)
@@ -44,11 +42,11 @@ function draw() {
   qtree = QuadTree.create()
   background(0)
 
-for (let i = 0; i < agents.length; i++) {
-	let curr = agents[i]
-	rectangle = new Rectangle(curr.x, curr.y, curr.r, curr.r, curr)
-	qtree.insert(rectangle)
-
+  for (let i = 0; i < agents.length; i++) {
+    let curr = agents[i]
+    rectangle = new Rectangle(curr.x, curr.y, curr.r, curr.r, curr)
+    qtree.insert(rectangle)
+    show(qtree)
     let range = new Circle(curr.x, curr.y, curr.r * 2)
     let points = qtree.query(range)
     curr.checkCollisions(points)
@@ -59,10 +57,28 @@ for (let i = 0; i < agents.length; i++) {
     curr.boundary()
   }
   if (agents.every((agent) => agent.choice === agents[0].choice)) {
-    // console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
+    console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
     alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
     noLoop()
   }
+}
+
+function show(qtree) {
+  noFill();
+  strokeWeight(1);
+  rectMode(CENTER);
+  stroke(255, 41);
+  rect(qtree.boundary.x, qtree.boundary.y, qtree.boundary.w, qtree.boundary.h);
+
+  stroke(255);
+  strokeWeight(2);
+
+  if (qtree.divided) {
+    show(qtree.northeast);
+    show(qtree.northwest);
+    show(qtree.southeast);
+    show(qtree.southwest);
+  }  
 }
 
 // base class for all agents -> 🤘 📰 ✂

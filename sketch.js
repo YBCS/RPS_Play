@@ -32,7 +32,7 @@ function setup() {
   rectMode(CENTER)
   imageMode(CENTER)
   createCanvas(400, 400)
-  numOfAgents = 3
+  numOfAgents = 9
   for (let i = 0; i < numOfAgents; i++) {
     agents.push(new AgentGeneric('rock'))
     agents.push(new AgentGeneric('paper'))
@@ -40,24 +40,27 @@ function setup() {
   }
 }
 
-/* for debugging */
-// function mouseClicked() {
-//     agents.push(new AgentGeneric('mask', mouseX, mouseY))
-// }
-
 function draw() {
+  qtree = QuadTree.create()
   background(0)
 
-  for (let i = 0; i < agents.length; i++) {
+for (let i = 0; i < agents.length; i++) {
+	let curr = agents[i]
+	rectangle = new Rectangle(curr.x, curr.y, curr.r, curr.r, curr)
+	qtree.insert(rectangle)
+
+    let range = new Circle(curr.x, curr.y, curr.r * 2)
+    let points = qtree.query(range)
+    curr.checkCollisions(points)
+
     // order matters because we set highlight in checkCollisions. draw() is called after this
-    agents[i].checkCollisions(agents)
-    agents[i].draw()
-    agents[i].move()
-    agents[i].boundary()
+    curr.draw()
+    curr.move()
+    curr.boundary()
   }
   if (agents.every((agent) => agent.choice === agents[0].choice)) {
-    // alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
-    console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
+    // console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
+    alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
     noLoop()
   }
 }
@@ -135,7 +138,6 @@ class Agent {
       if (this !== others[i]) {
         if (this.intersects(others[i])) {
           this.highlight = true
-          // console.log('collision ', this, others[i])
           this.collisionResolution(others[i])
         }
       }
@@ -177,29 +179,35 @@ class AgentGeneric extends Agent {
 
   // I am sure there is a better way to do this
   collisionResolution(other) {
-    if (this.choice === other.choice) {
+    let item = other.userData
+    if (this.choice === item.choice) {
       return
     }
 
-    if (this.choice === 'rock' && other.choice === 'paper') {
+    if (this.choice === 'rock' && item.choice === 'paper') {
       // other wins
       this.updateChoice('paper')
-    } else if (this.choice === 'paper' && other.choice === 'rock') {
+    } else if (this.choice === 'paper' && item.choice === 'rock') {
       // mine wins
-      other.updateChoice('paper')
-    } else if (this.choice === 'rock' && other.choice === 'scissor') {
+      item.updateChoice('paper')
+    } else if (this.choice === 'rock' && item.choice === 'scissor') {
       // mine wins
-      other.updateChoice('rock')
-    } else if (this.choice === 'scissor' && other.choice === 'rock') {
+      item.updateChoice('rock')
+    } else if (this.choice === 'scissor' && item.choice === 'rock') {
       // other wins
       this.updateChoice('rock')
-    } else if (this.choice === 'paper' && other.choice === 'scissor') {
+    } else if (this.choice === 'paper' && item.choice === 'scissor') {
       // other wins
       this.updateChoice('scissor')
-    } else if (this.choice === 'scissor' && other.choice === 'paper') {
+    } else if (this.choice === 'scissor' && item.choice === 'paper') {
       // mine wins
-      other.updateChoice('scissor')
+      item.updateChoice('scissor')
     }
     return
   }
 }
+
+/* for debugging */
+// function mouseClicked() {
+//     agents.push(new AgentGeneric('mask', mouseX, mouseY))
+// }

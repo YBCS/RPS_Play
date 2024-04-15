@@ -136,13 +136,13 @@ class Agent {
         if (this.intersects(others[i])) {
           this.highlight = true
           // console.log('collision ', this, others[i])
-          this.collisionResolution(this, others[i])
+          this.collisionResolution(others[i])
         }
       }
     }
   }
 
-  collisionResolution(mine, their) {
+  collisionResolution(other) {
     /* implements in subclass */
     return
   }
@@ -176,31 +176,29 @@ class AgentGeneric extends Agent {
   }
 
   // I am sure there is a better way to do this
-  collisionResolution(mine, their) {
-    // console.log('collision resolution called in subclass ', mine, their)
-
-    if (mine.choice === their.choice) {
+  collisionResolution(other) {
+    if (this.choice === other.choice) {
       return
     }
 
-    if (mine.choice === 'rock' && their.choice === 'paper') {
-      // their wins
-      mine.updateChoice('paper')
-    } else if (mine.choice === 'paper' && their.choice === 'rock') {
+    if (this.choice === 'rock' && other.choice === 'paper') {
+      // other wins
+      this.updateChoice('paper')
+    } else if (this.choice === 'paper' && other.choice === 'rock') {
       // mine wins
-      their.updateChoice('paper')
-    } else if (mine.choice === 'rock' && their.choice === 'scissor') {
+      other.updateChoice('paper')
+    } else if (this.choice === 'rock' && other.choice === 'scissor') {
       // mine wins
-      their.updateChoice('rock')
-    } else if (mine.choice === 'scissor' && their.choice === 'rock') {
-      // their wins
-      mine.updateChoice('rock')
-    } else if (mine.choice === 'paper' && their.choice === 'scissor') {
-      // their wins
-      mine.updateChoice('scissor')
-    } else if (mine.choice === 'scissor' && their.choice === 'paper') {
+      other.updateChoice('rock')
+    } else if (this.choice === 'scissor' && other.choice === 'rock') {
+      // other wins
+      this.updateChoice('rock')
+    } else if (this.choice === 'paper' && other.choice === 'scissor') {
+      // other wins
+      this.updateChoice('scissor')
+    } else if (this.choice === 'scissor' && other.choice === 'paper') {
       // mine wins
-      their.updateChoice('scissor')
+      other.updateChoice('scissor')
     }
     return
   }

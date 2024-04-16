@@ -29,13 +29,18 @@ function preload() {
 function setup() {
   rectMode(CENTER)
   imageMode(CENTER)
-  createCanvas(400, 400)
-  numOfAgents = 9
+  createCanvas(800, 800)
+  numOfAgents = 300
   for (let i = 0; i < numOfAgents; i++) {
     agents.push(new AgentGeneric('rock'))
     agents.push(new AgentGeneric('paper'))
     agents.push(new AgentGeneric('scissor'))
   }
+  // for (let i = 0; i < numOfAgents; i++) {
+  //   agents.push(new Agent())
+  //   agents.push(new Agent())
+  //   agents.push(new Agent())
+  // }
 }
 
 function draw() {
@@ -46,16 +51,15 @@ function draw() {
     let curr = agents[i]
     rectangle = new Rectangle(curr.x, curr.y, curr.r, curr.r, curr)
     qtree.insert(rectangle)
-    show(qtree)
     let range = new Circle(curr.x, curr.y, curr.r * 2)
     let points = qtree.query(range)
     curr.checkCollisions(points)
-
     // order matters because we set highlight in checkCollisions. draw() is called after this
     curr.draw()
     curr.move()
     curr.boundary()
   }
+  show(qtree)
   if (agents.every((agent) => agent.choice === agents[0].choice)) {
     console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
     alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
@@ -119,7 +123,9 @@ class Agent {
     }
     rect(this.x, this.y, this.r)
     stroke('black')
-    text(str(i), this.x, this.y) // order matters
+    if (i) {
+      text(str(i), this.x, this.y) // order matters
+    }
   }
 
   move() {

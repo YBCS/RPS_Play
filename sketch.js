@@ -13,6 +13,8 @@ let mask
 let rock_sound
 let paper_sound
 let scissor_sound
+let button
+var debug
 
 function preload() {
     rock = loadImage('assets/rock.png')
@@ -27,16 +29,17 @@ function preload() {
 function setup() {
     rectMode(CENTER)
     imageMode(CENTER)
-    createCanvas(800, 800)
-    numOfAgents = 300
+    createCanvas(400, 400)
+    numOfAgents = 10
     for (let i = 0; i < numOfAgents; i++) {
         agents.push(new AgentGeneric('rock'))
         agents.push(new AgentGeneric('paper'))
         agents.push(new AgentGeneric('scissor'))
     }
-    let button = createButton(isLooping() ? "Pause" : "Play");
-    button.position(width/2-50, height);
-    button.mousePressed(toggleLoop);
+    button = createButton('Pause/Play')
+    button.position(width / 2 - 50, height)
+    button.mousePressed(toggleLoop)
+    debug = false
 }
 
 function toggleLoop() {
@@ -44,7 +47,7 @@ function toggleLoop() {
         noLoop()
     } else {
         loop()
-    }   
+    }
 }
 
 function draw() {
@@ -53,13 +56,21 @@ function draw() {
 
     for (let i = 0; i < agents.length; i++) {
         let curr = agents[i]
-        rectangle = new Rectangle(curr.position.x, curr.position.y, curr.r, curr.r, curr)
+        rectangle = new Rectangle(
+            curr.position.x,
+            curr.position.y,
+            curr.r,
+            curr.r,
+            curr
+        )
         qtree.insert(rectangle)
-        let range = new Circle(curr.position.x, curr.position.y, curr.r * 2)
+        let range = new Circle(curr.position.x, curr.position.y, curr.r * 2) // range kinda small ?
         let points = qtree.query(range)
-        curr.checkCollisions(points)
+        // curr.checkCollisions(points)
+        curr.checkCollisionsAndDrawLine(points)
         // order matters because we set highlight in checkCollisions. draw() is called after this
         curr.draw()
+        // curr.jitter()
         curr.move()
         curr.boundary()
     }
@@ -71,7 +82,7 @@ function draw() {
     }
 
     // stroke("red")
-    // text(`mouse X ${mouseX} and mouse Y ${mouseY}`, 50, 50);  
+    // text(`mouse X ${mouseX} and mouse Y ${mouseY}`, 50, 50);
 }
 
 function show(qtree) {

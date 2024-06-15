@@ -5,11 +5,11 @@ class Agent {
 
         this.highlight = false
         this.position = createVector(x, y)
-        this.velocity = createVector(random(0.5,2.5), random(0.5,2.5))
+        this.velocity = createVector(random(0.5, 2.5), random(0.5, 2.5))
 
         // too close to one of the edges
-        this.position.x = constrain(this.position.x, this.r, width-this.r);
-        this.position.y = constrain(this.position.y, this.r, height-this.r);
+        this.position.x = constrain(this.position.x, this.r, width - this.r)
+        this.position.y = constrain(this.position.y, this.r, height - this.r)
     }
 
     draw(i) {
@@ -20,7 +20,7 @@ class Agent {
         }
         rect(this.position.x, this.position.y, this.r)
         stroke('green')
-        if (i) {
+        if (i && debug) {
             text(
                 `pos: (${int(this.position.x)}, ${int(this.position.y)}) ${str(
                     i
@@ -36,8 +36,8 @@ class Agent {
     }
 
     // jitter() {
-    //     this.x += random([-this.speedX, this.speedX])
-    //     this.y += random([-this.speedY, this.speedY])
+    //     this.position.x += random([-this.speedX, this.speedX])
+    //     this.position.y += random([-this.speedY, this.speedY])
     //     // needs that bound check --> its weird here because of rectMode(CENTER)
     // }
 
@@ -60,7 +60,6 @@ class Agent {
 
     // checks if this agent intersects with another agent
     intersects(other) {
-
         let d = dist(this.position.x, this.position.y, other.x, other.y)
         if (d < this.r) {
             return true
@@ -90,11 +89,13 @@ class Agent {
 class AgentGeneric extends Agent {
     constructor(choice, x = random(width - 20), y = random(height - 20)) {
         super(x, y)
-        this.choice = choice // rock, paper, scissor
+        this.choice = choice // rock 0, paper 1, scissor 2, unknown: -1
+        this.choice_code = choice === 'rock' ? 0 : choice === 'paper' ? 1 : choice === 'scissor' ? 2 : -1
     }
 
-    updateChoice(choice) {
+    updateChoice(choice, choice_code) {
         this.choice = choice
+        this.choice_code = choice_code
     }
 
     draw(i) {
@@ -115,31 +116,139 @@ class AgentGeneric extends Agent {
         }
     }
 
+    // todo : remaining half and why is it needed in the first place ?
+    checkCollisionsAndDrawLine(others) {
+        let closest_rock_from_paper
+        let closest_paper_from_scissor
+        let closest_scissor_from_rock
+        let closest_rock_from_paper_dist = max(width, height)
+        let closest_paper_from_scissor_dist = max(width, height)
+        let closest_scissor_from_rock_dist = max(width, height)
+
+        // intersects and collision resolution is now buit in this function
+        for (let i = 0; i < others.length; i++) {
+            let item = others[i].userData
+            if (this !== others[i] && this.choice !== item.choice) {
+                let d = dist(
+                    this.position.x,
+                    this.position.y,
+                    item.position.x,
+                    item.position.y
+                )
+                if (this.choice_code === 0) {
+                    // rock
+                    // get the closest scissor
+                    if (item.choice_code == 2) {
+                        if (d < closest_scissor_from_rock_dist) {
+                            closest_scissor_from_rock = others[i]
+                            closest_scissor_from_rock_dist = d
+                            if (d < this.r) {
+                                // intersects
+                                this.collisionResolution(others[i])
+                            }
+                        }
+                    }
+                }
+                if (this.choice_code === 1) {
+                    // paper
+                    // get the closest rock
+                    if (item.choice_code == 0) {
+                        if (d < closest_rock_from_paper_dist) {
+                            closest_rock_from_paper = others[i]
+                            closest_rock_from_paper_dist = d
+                            if (d < this.r) {
+                                // intersects
+                                // this.collisionResolution(others[i])
+                            }
+                        }
+                    }
+                }
+                if (this.choice_code === 2) {
+                    // scissor
+                    // get the closest paper
+                    if (item.choice_code == 1) {
+                        if (d < closest_paper_from_scissor_dist) {
+                            closest_paper_from_scissor = others[i]
+                            closest_paper_from_scissor_dist = d
+                            if (d < this.r) {
+                                // intersects
+                                // this.collisionResolution(others[i])
+                            }
+                        }
+                    }
+                    // todo : handle this opposing cases for all of them
+                    // todo : can I use a function so that DRY ?
+                    // scissor meets rock -> scissor becomes rock
+                    if (item.choice_code === 0) {
+                        if (d < closest_paper_from_scissor_dist) {
+                            closest_paper_from_scissor = others[i]
+                            closest_paper_from_scissor_dist = d
+                            if (d < this.r) {
+                                // intersects
+                                // this.collisionResolution(others[i])
+                            }
+                        }                        
+                    }
+                }
+            }
+        }
+
+        // for a source agent, I have calculated the nearest target
+        if (debug) {
+            if (closest_scissor_from_rock) {
+                this.drawLineUtil(this, closest_scissor_from_rock.userData, 'red')
+            }
+            if (closest_rock_from_paper) {
+                this.drawLineUtil(this, closest_rock_from_paper.userData, 'green')
+            }
+            if (closest_paper_from_scissor) {
+                this.drawLineUtil(this, closest_paper_from_scissor.userData, 'yellow')
+            }
+        }
+    }
+
+    drawLineUtil(source, destination, color) {
+        stroke(color)
+        line(
+            source.position.x,
+            source.position.y,
+            destination.position.x,
+            destination.position.y
+        )
+    }
+
     // I am sure there is a better way to do this
     collisionResolution(other) {
         let item = other.userData
-        if (this.choice === item.choice) {
+        if (this.choice_code === item.choice_code) {
             return
         }
+        if (debug) { // highlights the two boxes which are meeting
+            stroke('green')
+            rect(this.position.x, this.position.y, this.r, this.r)
+            stroke('red')
+            rect(item.position.x, item.position.y, item.r, item.r)
+            noLoop()
+        }
 
-        if (this.choice === 'rock' && item.choice === 'paper') {
+        if (this.choice_code === 0 && item.choice_code === 1) {
             // other wins
-            this.updateChoice('paper')
-        } else if (this.choice === 'paper' && item.choice === 'rock') {
+            this.updateChoice('paper', 1)
+        } else if (this.choice_code === 1 && item.choice_code === 0) {
             // mine wins
-            item.updateChoice('paper')
-        } else if (this.choice === 'rock' && item.choice === 'scissor') {
+            item.updateChoice('paper', 1)
+        } else if (this.choice_code === 0 && item.choice_code === 2) {
             // mine wins
-            item.updateChoice('rock')
-        } else if (this.choice === 'scissor' && item.choice === 'rock') {
+            item.updateChoice('rock', 0)
+        } else if (this.choice_code === 2 && item.choice_code === 0) {
             // other wins
-            this.updateChoice('rock')
-        } else if (this.choice === 'paper' && item.choice === 'scissor') {
+            this.updateChoice('rock', 0)
+        } else if (this.choice_code === 1 && item.choice_code === 2) {
             // other wins
-            this.updateChoice('scissor')
-        } else if (this.choice === 'scissor' && item.choice === 'paper') {
+            this.updateChoice('scissor', 2)
+        } else if (this.choice_code === 2 && item.choice_code === 1) {
             // mine wins
-            item.updateChoice('scissor')
+            item.updateChoice('scissor', 2)
         }
         return
     }

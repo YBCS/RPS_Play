@@ -2,30 +2,14 @@
 class Agent {
     constructor(x = random(width - 20), y = random(height - 20)) {
         this.r = 20 // gets complicated if r is exposed
-        this.x = x
-        this.y = y
-
-        if (y < this.r) {
-            // too close to the top panel
-            this.y = y + this.r
-        }
-        if (x < this.r) {
-            // too close to the left panel
-            this.x = x + this.r
-        }
-        if (y > height - this.r) {
-            // too close to the bottom panel
-            this.y = y - this.r
-        }
-        if (x > height - this.r) {
-            // too close to the right panel
-            this.x = x - this.r
-        }
 
         this.highlight = false
-        let random_number = random([random(-2, -1), random(1, 2)])
-        this.speedX = random_number
-        this.speedY = random_number
+        this.position = createVector(x, y)
+        this.velocity = createVector(random(0.5,2.5), random(0.5,2.5))
+
+        // too close to one of the edges
+        this.position.x = constrain(this.position.x, this.r, width-this.r);
+        this.position.y = constrain(this.position.y, this.r, height-this.r);
     }
 
     draw(i) {
@@ -34,32 +18,50 @@ class Agent {
         } else {
             fill('white')
         }
-        rect(this.x, this.y, this.r)
-        stroke('black')
+        rect(this.position.x, this.position.y, this.r)
+        stroke('green')
         if (i) {
-            text(str(i), this.x, this.y) // order matters
+            text(
+                `pos: (${int(this.position.x)}, ${int(this.position.y)}) ${str(
+                    i
+                )}`,
+                this.position.x,
+                this.position.y
+            ) // order matters
         }
     }
 
     move() {
-        this.x += this.speedX
-        this.y += this.speedY
+        this.position.add(this.velocity)
     }
+
+    // jitter() {
+    //     this.x += random([-this.speedX, this.speedX])
+    //     this.y += random([-this.speedY, this.speedY])
+    //     // needs that bound check --> its weird here because of rectMode(CENTER)
+    // }
 
     boundary() {
         // bounce off the walls
 
-        if (this.x > width - this.r / 2 || this.x - this.r / 2 < 0) {
-            this.speedX *= -1
+        if (
+            this.position.x > width - this.r / 2 ||
+            this.position.x - this.r / 2 < 0
+        ) {
+            this.velocity.x *= -1
         }
-        if (this.y > height - this.r / 2 || this.y - this.r / 2 < 0) {
-            this.speedY *= -1
+        if (
+            this.position.y > height - this.r / 2 ||
+            this.position.y - this.r / 2 < 0
+        ) {
+            this.velocity.y *= -1
         }
     }
 
     // checks if this agent intersects with another agent
     intersects(other) {
-        let d = dist(this.x, this.y, other.x, other.y)
+
+        let d = dist(this.position.x, this.position.y, other.x, other.y)
         if (d < this.r) {
             return true
         }
@@ -72,7 +74,7 @@ class Agent {
         for (let i = 0; i < others.length; i++) {
             if (this !== others[i]) {
                 if (this.intersects(others[i])) {
-                    this.highlight = true
+                    this.highlight = true // okay a self fulfilling prophecy ?
                     this.collisionResolution(others[i])
                 }
             }
@@ -95,19 +97,20 @@ class AgentGeneric extends Agent {
         this.choice = choice
     }
 
-    draw() {
+    draw(i) {
+        // super.draw(i) // for debugging
         switch (this.choice) {
             case 'rock':
-                image(rock, this.x, this.y, this.r, this.r)
+                image(rock, this.position.x, this.position.y, this.r, this.r)
                 break
             case 'paper':
-                image(paper, this.x, this.y, this.r, this.r)
+                image(paper, this.position.x, this.position.y, this.r, this.r)
                 break
             case 'scissor':
-                image(scissor, this.x, this.y, this.r, this.r)
+                image(scissor, this.position.x, this.position.y, this.r, this.r)
                 break
             default:
-                image(mask, this.x, this.y, this.r, this.r)
+                image(mask, this.position.x, this.position.y, this.r, this.r)
                 break
         }
     }

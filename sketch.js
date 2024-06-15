@@ -34,6 +34,17 @@ function setup() {
         agents.push(new AgentGeneric('paper'))
         agents.push(new AgentGeneric('scissor'))
     }
+    let button = createButton(isLooping() ? "Pause" : "Play");
+    button.position(width/2-50, height);
+    button.mousePressed(toggleLoop);
+}
+
+function toggleLoop() {
+    if (isLooping()) {
+        noLoop()
+    } else {
+        loop()
+    }   
 }
 
 function draw() {
@@ -42,9 +53,9 @@ function draw() {
 
     for (let i = 0; i < agents.length; i++) {
         let curr = agents[i]
-        rectangle = new Rectangle(curr.x, curr.y, curr.r, curr.r, curr)
+        rectangle = new Rectangle(curr.position.x, curr.position.y, curr.r, curr.r, curr)
         qtree.insert(rectangle)
-        let range = new Circle(curr.x, curr.y, curr.r * 2)
+        let range = new Circle(curr.position.x, curr.position.y, curr.r * 2)
         let points = qtree.query(range)
         curr.checkCollisions(points)
         // order matters because we set highlight in checkCollisions. draw() is called after this
@@ -55,9 +66,12 @@ function draw() {
     show(qtree)
     if (agents.every((agent) => agent.choice === agents[0].choice)) {
         console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
-        alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
         noLoop()
+        alert(`GAME OVER !!! ${agents[0].choice} WINS.`)
     }
+
+    // stroke("red")
+    // text(`mouse X ${mouseX} and mouse Y ${mouseY}`, 50, 50);  
 }
 
 function show(qtree) {

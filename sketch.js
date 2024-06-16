@@ -2,10 +2,7 @@
 Goals:
 */
 
-let agents = []
-let rocks = []
-let papers = []
-let scissors = []
+let agents
 let rock
 let paper
 let scissor
@@ -14,7 +11,9 @@ let rock_sound
 let paper_sound
 let scissor_sound
 let button
-var debug
+let button_reset
+let checkbox
+var debug = false
 
 function preload() {
     rock = loadImage('assets/rock.png')
@@ -26,31 +25,38 @@ function preload() {
     // scissor_sound = loadSound("assets/scissor_effect.mp3");
 }
 
-function setup() {
-    rectMode(CENTER)
-    imageMode(CENTER)
-    createCanvas(400, 400)
+function resetSketch() {
+    agents = []
     numOfAgents = 10
     for (let i = 0; i < numOfAgents; i++) {
         agents.push(new AgentGeneric('rock'))
         agents.push(new AgentGeneric('paper'))
         agents.push(new AgentGeneric('scissor'))
     }
+    if (!isLooping()) loop()
+}
+
+function setup() {
+    rectMode(CENTER)
+    imageMode(CENTER)
+    createCanvas(400, 400)
+    resetSketch()
     button = createButton('Pause/Play')
     button.position(width / 2 - 50, height)
     button.mousePressed(toggleLoop)
-    debug = false
+    button = createButton('Reset')
+    button.position(width - 50, height)
+    button.mousePressed(resetSketch)
+    checkbox = createCheckbox(' Debug!')
+    checkbox.position(0, height)
 }
 
 function toggleLoop() {
-    if (isLooping()) {
-        noLoop()
-    } else {
-        loop()
-    }
+    isLooping() ? noLoop() : loop()
 }
 
 function draw() {
+    debug = checkbox.checked() ? true : false
     qtree = QuadTree.create()
     background(0)
 
@@ -66,7 +72,6 @@ function draw() {
         qtree.insert(rectangle)
         let range = new Circle(curr.position.x, curr.position.y, curr.r * 2) // range kinda small ?
         let points = qtree.query(range)
-        // curr.checkCollisions(points)
         curr.checkCollisionsAndDrawLine(points)
         // order matters because we set highlight in checkCollisions. draw() is called after this
         curr.draw()
@@ -74,7 +79,7 @@ function draw() {
         curr.move()
         curr.boundary()
     }
-    show(qtree)
+    if (debug) show(qtree)
     if (agents.every((agent) => agent.choice === agents[0].choice)) {
         console.log(`GAME OVER !!! ${agents[0].choice} WINS.`)
         noLoop()

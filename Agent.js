@@ -35,11 +35,12 @@ class Agent {
         this.position.add(this.velocity)
     }
 
-    // jitter() {
-    //     this.position.x += random([-this.speedX, this.speedX])
-    //     this.position.y += random([-this.speedY, this.speedY])
-    //     // needs that bound check --> its weird here because of rectMode(CENTER)
-    // }
+    jitter() {
+        let jitter = createVector(random(-1, 1), random(-1, 1));
+        this.position.add(jitter);
+        this.position.x = constrain(this.position.x, this.r/2, width - (this.r/2))
+        this.position.y = constrain(this.position.y, this.r/2, height - (this.r/2))
+    }
 
     boundary() {
         // bounce off the walls
@@ -67,7 +68,7 @@ class Agent {
         return false
     }
 
-    // others is an array of agents
+    // others is an array of agents; no longer in use
     checkCollisions(others) {
         this.highlight = false
         for (let i = 0; i < others.length; i++) {
@@ -89,15 +90,19 @@ class Agent {
 class AgentGeneric extends Agent {
     constructor(choice, x = random(width - 20), y = random(height - 20)) {
         super(x, y)
-        this.choice = choice // rock 0, paper 1, scissor 2, unknown: -1
-        this.choice_code =
-            choice === 'rock'
-                ? 0
-                : choice === 'paper'
-                ? 1
-                : choice === 'scissor'
-                ? 2
-                : -1
+        this.choice = choice
+        this.choice_code = this.getChoiceCode(choice)
+    }
+
+    getChoiceCode(choice) {
+        // rock 0, paper 1, scissor 2, unknown: -1
+        return choice === 'rock'
+            ? 0
+            : choice === 'paper'
+            ? 1
+            : choice === 'scissor'
+            ? 2
+            : -1
     }
 
     updateChoice(choice, choice_code) {
@@ -282,46 +287,22 @@ class AgentGeneric extends Agent {
         // for a source agent, I have calculated the nearest target
         if (debug) {
             if (closest_scissor_from_rock) {
-                this.drawLineUtil(
-                    this,
-                    closest_scissor_from_rock.userData,
-                    'red'
-                )
+                this.drawLineUtil(closest_scissor_from_rock.userData, 'red')
             }
             if (closest_rock_from_paper) {
-                this.drawLineUtil(
-                    this,
-                    closest_rock_from_paper.userData,
-                    'green'
-                )
+                this.drawLineUtil(closest_rock_from_paper.userData, 'green')
             }
             if (closest_scissor_from_paper) {
-                this.drawLineUtil(
-                    this,
-                    closest_scissor_from_paper.userData,
-                    'green'
-                )
+                this.drawLineUtil(closest_scissor_from_paper.userData, 'green')
             }
             if (closest_rock_from_scissor) {
-                this.drawLineUtil(
-                    this,
-                    closest_rock_from_scissor.userData,
-                    'green'
-                )
+                this.drawLineUtil(closest_rock_from_scissor.userData, 'green')
             }
             if (closest_paper_from_scissor) {
-                this.drawLineUtil(
-                    this,
-                    closest_paper_from_scissor.userData,
-                    'yellow'
-                )
+                this.drawLineUtil(closest_paper_from_scissor.userData, 'yellow')
             }
             if (closest_paper_from_rock) {
-                this.drawLineUtil(
-                    this,
-                    closest_paper_from_rock.userData,
-                    'yellow'
-                )
+                this.drawLineUtil(closest_paper_from_rock.userData, 'yellow')
             }
         }
     }
@@ -357,12 +338,11 @@ class AgentGeneric extends Agent {
         }
     }
 
-    drawLineUtil(source, destination, color) {
-        // print('draw a line ', source, destination)
+    drawLineUtil(destination, color) {
         stroke(color)
         line(
-            source.position.x,
-            source.position.y,
+            this.position.x,
+            this.position.y,
             destination.position.x,
             destination.position.y
         )

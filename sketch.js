@@ -39,7 +39,7 @@ function resetSketch() {
 function setup() {
     rectMode(CENTER)
     imageMode(CENTER)
-    createCanvas(400, 400)
+    createCanvas(500, 500)
     resetSketch()
     button = createButton('Pause/Play')
     button.position(width / 2 - 50, height)
@@ -75,7 +75,7 @@ function draw() {
         curr.checkCollisionsAndDrawLine(points)
         // order matters because we set highlight in checkCollisions. draw() is called after this
         curr.draw()
-        // curr.jitter()
+        curr.jitter()
         curr.move()
         curr.boundary()
     }

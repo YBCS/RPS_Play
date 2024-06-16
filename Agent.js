@@ -116,25 +116,79 @@ class AgentGeneric extends Agent {
         }
     }
 
-    // todo : remaining half and why is it needed in the first place ?
+    // not in use
+    findClosestAgents(others) {
+        let closest_rock
+        let closest_paper
+        let closest_scissor
+        let closest_rock_dist = width
+        let closest_paper_dist = width
+        let closest_scissor_dist = width
+
+        for (let i = 0; i < others.length; i++) {
+            let item = others[i].userData 
+            let d = dist(
+                this.position.x,
+                this.position.y,
+                item.position.x,
+                item.position.y
+            )
+            if (item.choice_code === 0 && this.choice_code !== 0) { // rock
+                if (this.choice_code === 0)
+                if (d < closest_rock_dist) {
+                    closest_rock_dist = d
+                    closest_rock = others[i]
+                }
+            }
+            else if (item.choice_code === 1  && this.choice_code !== 1) { // paper
+                if (d < closest_paper_dist) {
+                    closest_paper_dist = d
+                    closest_paper = others[i]
+                }
+            }
+            else if (item.choice_code === 2  && this.choice_code !== 2) { // scissor
+                if (d < closest_scissor_dist) {
+                    closest_scissor_dist = d
+                    closest_scissor = others[i]
+                }
+            }
+        }
+
+        return {
+            closest_rock,
+            closest_paper,
+            closest_scissor,
+            closest_rock_dist,
+            closest_paper_dist,
+            closest_scissor_dist,
+        }
+    }
+
+    // todo : can I use a function so that DRY ?
     checkCollisionsAndDrawLine(others) {
         let closest_rock_from_paper
+        let closest_scissor_from_paper
+        let closest_rock_from_scissor
         let closest_paper_from_scissor
+        let closest_paper_from_rock
         let closest_scissor_from_rock
         let closest_rock_from_paper_dist = max(width, height)
+        let closest_rock_from_scissor_dist = max(width, height)
         let closest_paper_from_scissor_dist = max(width, height)
+        let closest_paper_from_rock_dist = max(width, height)
         let closest_scissor_from_rock_dist = max(width, height)
+        let closest_scissor_from_paper_dist = max(width, height)
 
-        // intersects and collision resolution is now buit in this function
         for (let i = 0; i < others.length; i++) {
             let item = others[i].userData
-            if (this !== others[i] && this.choice !== item.choice) {
+            if (this.choice_code !== item.choice_code) {
                 let d = dist(
                     this.position.x,
                     this.position.y,
                     item.position.x,
                     item.position.y
                 )
+                // complete
                 if (this.choice_code === 0) {
                     // rock
                     // get the closest scissor
@@ -142,13 +196,23 @@ class AgentGeneric extends Agent {
                         if (d < closest_scissor_from_rock_dist) {
                             closest_scissor_from_rock = others[i]
                             closest_scissor_from_rock_dist = d
-                            if (d < this.r) {
-                                // intersects
+                            if (d < this.r) { // intersects
+                                this.collisionResolution(others[i])
+                            }
+                        }
+                    }
+                    // rock meets paper -> rock becomes paper
+                    if (item.choice_code == 1) {
+                        if (d < closest_paper_from_rock_dist) {
+                            closest_paper_from_rock = others[i]
+                            closest_paper_from_rock_dist = d
+                            if (d < this.r) { // intersects
                                 this.collisionResolution(others[i])
                             }
                         }
                     }
                 }
+
                 if (this.choice_code === 1) {
                     // paper
                     // get the closest rock
@@ -156,13 +220,23 @@ class AgentGeneric extends Agent {
                         if (d < closest_rock_from_paper_dist) {
                             closest_rock_from_paper = others[i]
                             closest_rock_from_paper_dist = d
-                            if (d < this.r) {
-                                // intersects
-                                // this.collisionResolution(others[i])
+                            if (d < this.r) { // intersects
+                                this.collisionResolution(others[i])
+                            }
+                        }
+                    }
+                    // paper meets scissor -> paper becomes scissor
+                    if (item.choice_code == 2) {
+                        if (d < closest_scissor_from_paper_dist) {
+                            closest_scissor_from_paper = others[i]
+                            closest_scissor_from_paper_dist = d
+                            if (d < this.r) { // intersects
+                                this.collisionResolution(others[i])
                             }
                         }
                     }
                 }
+
                 if (this.choice_code === 2) {
                     // scissor
                     // get the closest paper
@@ -170,22 +244,20 @@ class AgentGeneric extends Agent {
                         if (d < closest_paper_from_scissor_dist) {
                             closest_paper_from_scissor = others[i]
                             closest_paper_from_scissor_dist = d
-                            if (d < this.r) {
-                                // intersects
-                                // this.collisionResolution(others[i])
+                            if (d < this.r) { // intersects
+                                
+                                this.collisionResolution(others[i])
                             }
                         }
                     }
-                    // todo : handle this opposing cases for all of them
-                    // todo : can I use a function so that DRY ?
+                    
                     // scissor meets rock -> scissor becomes rock
                     if (item.choice_code === 0) {
-                        if (d < closest_paper_from_scissor_dist) {
-                            closest_paper_from_scissor = others[i]
-                            closest_paper_from_scissor_dist = d
-                            if (d < this.r) {
-                                // intersects
-                                // this.collisionResolution(others[i])
+                        if (d < closest_rock_from_scissor_dist) {
+                            closest_rock_from_scissor = others[i]
+                            closest_rock_from_scissor_dist = d
+                            if (d < this.r) { // intersects
+                                this.collisionResolution(others[i])
                             }
                         }                        
                     }
@@ -201,13 +273,54 @@ class AgentGeneric extends Agent {
             if (closest_rock_from_paper) {
                 this.drawLineUtil(this, closest_rock_from_paper.userData, 'green')
             }
+            if (closest_scissor_from_paper) {
+                this.drawLineUtil(this, closest_scissor_from_paper.userData, 'green')
+            }
+            if (closest_rock_from_scissor) {
+                this.drawLineUtil(this, closest_rock_from_scissor.userData, 'green')
+            }
             if (closest_paper_from_scissor) {
                 this.drawLineUtil(this, closest_paper_from_scissor.userData, 'yellow')
+            }
+            if (closest_paper_from_rock) {
+                this.drawLineUtil(this, closest_paper_from_rock.userData, 'yellow')
             }
         }
     }
 
+    // alternate version; not working
+    checkCollisionsAndDrawLineAlt(others) {
+        // let rock, paper, scissor, rock_d, paper_d, scissor_d = this.findClosestAgents(others)
+        // print('called ', rock, paper, scissor, rock_d, paper_d, scissor_d)
+        let data = this.findClosestAgents(others)
+        // print('called ', data)
+        
+        if (data.closest_rock && data.closest_rock_dist < this.r) {
+            this.collisionResolution(data.closest_rock)
+        }
+        if (data.closest_paper && data.closest_paper_dist < this.r) {
+            this.collisionResolution(data.closest_paper)
+        }
+        if (data.closest_scissor && data.closest_scissor_dist < this.r) {
+            this.collisionResolution(data.closest_scissor)
+        }
+
+        // for a source agent, I have calculated the nearest target
+        if (debug) {
+            if (data.closest_rock) {
+                this.drawLineUtil(this, data.closest_rock.userData, 'red')
+            }
+            if (data.closest_paper) {
+                this.drawLineUtil(this, data.closest_paper.userData, 'green')
+            }
+            if (data.closest_scissor) {
+                this.drawLineUtil(this, data.closest_scissor.userData, 'yellow')
+            }
+        }
+    }    
+
     drawLineUtil(source, destination, color) {
+        // print('draw a line ', source, destination)
         stroke(color)
         line(
             source.position.x,
@@ -217,18 +330,18 @@ class AgentGeneric extends Agent {
         )
     }
 
-    // I am sure there is a better way to do this
     collisionResolution(other) {
         let item = other.userData
         if (this.choice_code === item.choice_code) {
             return
         }
+
         if (debug) { // highlights the two boxes which are meeting
             stroke('green')
             rect(this.position.x, this.position.y, this.r, this.r)
             stroke('red')
             rect(item.position.x, item.position.y, item.r, item.r)
-            noLoop()
+            // noLoop()
         }
 
         if (this.choice_code === 0 && item.choice_code === 1) {

@@ -90,7 +90,14 @@ class AgentGeneric extends Agent {
     constructor(choice, x = random(width - 20), y = random(height - 20)) {
         super(x, y)
         this.choice = choice // rock 0, paper 1, scissor 2, unknown: -1
-        this.choice_code = choice === 'rock' ? 0 : choice === 'paper' ? 1 : choice === 'scissor' ? 2 : -1
+        this.choice_code =
+            choice === 'rock'
+                ? 0
+                : choice === 'paper'
+                ? 1
+                : choice === 'scissor'
+                ? 2
+                : -1
     }
 
     updateChoice(choice, choice_code) {
@@ -126,27 +133,28 @@ class AgentGeneric extends Agent {
         let closest_scissor_dist = width
 
         for (let i = 0; i < others.length; i++) {
-            let item = others[i].userData 
+            let item = others[i].userData
             let d = dist(
                 this.position.x,
                 this.position.y,
                 item.position.x,
                 item.position.y
             )
-            if (item.choice_code === 0 && this.choice_code !== 0) { // rock
+            if (item.choice_code === 0 && this.choice_code !== 0) {
+                // rock
                 if (this.choice_code === 0)
-                if (d < closest_rock_dist) {
-                    closest_rock_dist = d
-                    closest_rock = others[i]
-                }
-            }
-            else if (item.choice_code === 1  && this.choice_code !== 1) { // paper
+                    if (d < closest_rock_dist) {
+                        closest_rock_dist = d
+                        closest_rock = others[i]
+                    }
+            } else if (item.choice_code === 1 && this.choice_code !== 1) {
+                // paper
                 if (d < closest_paper_dist) {
                     closest_paper_dist = d
                     closest_paper = others[i]
                 }
-            }
-            else if (item.choice_code === 2  && this.choice_code !== 2) { // scissor
+            } else if (item.choice_code === 2 && this.choice_code !== 2) {
+                // scissor
                 if (d < closest_scissor_dist) {
                     closest_scissor_dist = d
                     closest_scissor = others[i]
@@ -196,7 +204,8 @@ class AgentGeneric extends Agent {
                         if (d < closest_scissor_from_rock_dist) {
                             closest_scissor_from_rock = others[i]
                             closest_scissor_from_rock_dist = d
-                            if (d < this.r) { // intersects
+                            if (d < this.r) {
+                                // intersects
                                 this.collisionResolution(others[i])
                             }
                         }
@@ -206,7 +215,8 @@ class AgentGeneric extends Agent {
                         if (d < closest_paper_from_rock_dist) {
                             closest_paper_from_rock = others[i]
                             closest_paper_from_rock_dist = d
-                            if (d < this.r) { // intersects
+                            if (d < this.r) {
+                                // intersects
                                 this.collisionResolution(others[i])
                             }
                         }
@@ -220,7 +230,8 @@ class AgentGeneric extends Agent {
                         if (d < closest_rock_from_paper_dist) {
                             closest_rock_from_paper = others[i]
                             closest_rock_from_paper_dist = d
-                            if (d < this.r) { // intersects
+                            if (d < this.r) {
+                                // intersects
                                 this.collisionResolution(others[i])
                             }
                         }
@@ -230,7 +241,8 @@ class AgentGeneric extends Agent {
                         if (d < closest_scissor_from_paper_dist) {
                             closest_scissor_from_paper = others[i]
                             closest_scissor_from_paper_dist = d
-                            if (d < this.r) { // intersects
+                            if (d < this.r) {
+                                // intersects
                                 this.collisionResolution(others[i])
                             }
                         }
@@ -244,22 +256,24 @@ class AgentGeneric extends Agent {
                         if (d < closest_paper_from_scissor_dist) {
                             closest_paper_from_scissor = others[i]
                             closest_paper_from_scissor_dist = d
-                            if (d < this.r) { // intersects
-                                
+                            if (d < this.r) {
+                                // intersects
+
                                 this.collisionResolution(others[i])
                             }
                         }
                     }
-                    
+
                     // scissor meets rock -> scissor becomes rock
                     if (item.choice_code === 0) {
                         if (d < closest_rock_from_scissor_dist) {
                             closest_rock_from_scissor = others[i]
                             closest_rock_from_scissor_dist = d
-                            if (d < this.r) { // intersects
+                            if (d < this.r) {
+                                // intersects
                                 this.collisionResolution(others[i])
                             }
-                        }                        
+                        }
                     }
                 }
             }
@@ -268,22 +282,46 @@ class AgentGeneric extends Agent {
         // for a source agent, I have calculated the nearest target
         if (debug) {
             if (closest_scissor_from_rock) {
-                this.drawLineUtil(this, closest_scissor_from_rock.userData, 'red')
+                this.drawLineUtil(
+                    this,
+                    closest_scissor_from_rock.userData,
+                    'red'
+                )
             }
             if (closest_rock_from_paper) {
-                this.drawLineUtil(this, closest_rock_from_paper.userData, 'green')
+                this.drawLineUtil(
+                    this,
+                    closest_rock_from_paper.userData,
+                    'green'
+                )
             }
             if (closest_scissor_from_paper) {
-                this.drawLineUtil(this, closest_scissor_from_paper.userData, 'green')
+                this.drawLineUtil(
+                    this,
+                    closest_scissor_from_paper.userData,
+                    'green'
+                )
             }
             if (closest_rock_from_scissor) {
-                this.drawLineUtil(this, closest_rock_from_scissor.userData, 'green')
+                this.drawLineUtil(
+                    this,
+                    closest_rock_from_scissor.userData,
+                    'green'
+                )
             }
             if (closest_paper_from_scissor) {
-                this.drawLineUtil(this, closest_paper_from_scissor.userData, 'yellow')
+                this.drawLineUtil(
+                    this,
+                    closest_paper_from_scissor.userData,
+                    'yellow'
+                )
             }
             if (closest_paper_from_rock) {
-                this.drawLineUtil(this, closest_paper_from_rock.userData, 'yellow')
+                this.drawLineUtil(
+                    this,
+                    closest_paper_from_rock.userData,
+                    'yellow'
+                )
             }
         }
     }
@@ -294,7 +332,7 @@ class AgentGeneric extends Agent {
         // print('called ', rock, paper, scissor, rock_d, paper_d, scissor_d)
         let data = this.findClosestAgents(others)
         // print('called ', data)
-        
+
         if (data.closest_rock && data.closest_rock_dist < this.r) {
             this.collisionResolution(data.closest_rock)
         }
@@ -317,7 +355,7 @@ class AgentGeneric extends Agent {
                 this.drawLineUtil(this, data.closest_scissor.userData, 'yellow')
             }
         }
-    }    
+    }
 
     drawLineUtil(source, destination, color) {
         // print('draw a line ', source, destination)
@@ -336,7 +374,8 @@ class AgentGeneric extends Agent {
             return
         }
 
-        if (debug) { // highlights the two boxes which are meeting
+        if (debug) {
+            // highlights the two boxes which are meeting
             stroke('green')
             rect(this.position.x, this.position.y, this.r, this.r)
             stroke('red')

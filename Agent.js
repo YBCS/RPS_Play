@@ -59,28 +59,6 @@ class Agent {
         }
     }
 
-    // checks if this agent intersects with another agent
-    intersects(other) {
-        let d = dist(this.position.x, this.position.y, other.x, other.y)
-        if (d < this.r) {
-            return true
-        }
-        return false
-    }
-
-    // others is an array of agents; no longer in use
-    checkCollisions(others) {
-        this.highlight = false
-        for (let i = 0; i < others.length; i++) {
-            if (this !== others[i]) {
-                if (this.intersects(others[i])) {
-                    this.highlight = true // okay a self fulfilling prophecy ?
-                    this.collisionResolution(others[i])
-                }
-            }
-        }
-    }
-
     collisionResolution(other) {
         /* implements in subclass */
         return

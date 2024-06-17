@@ -27,7 +27,7 @@ function preload() {
 
 function resetSketch() {
     agents = []
-    numOfAgents = 10
+    numOfAgents = 32
     for (let i = 0; i < numOfAgents; i++) {
         agents.push(new AgentGeneric('rock'))
         agents.push(new AgentGeneric('paper'))
@@ -39,7 +39,7 @@ function resetSketch() {
 function setup() {
     rectMode(CENTER)
     imageMode(CENTER)
-    createCanvas(500, 500)
+    createCanvas(400, 400)
     resetSketch()
     button = createButton('Pause/Play')
     button.position(width / 2 - 50, height)

@@ -5,7 +5,7 @@ class Agent {
 
         this.highlight = false
         this.position = createVector(x, y)
-        this.velocity = createVector(random(0.5, 2.5), random(0.5, 2.5))
+        this.velocity = createVector(random(-0.5, 0.5), random(-0.5, 0.5))
 
         // too close to one of the edges
         this.position.x = constrain(this.position.x, this.r, width - this.r)
@@ -201,7 +201,7 @@ class AgentGeneric extends Agent {
                     item.position.x,
                     item.position.y
                 )
-                // complete
+                
                 if (this.choice_code === 0) {
                     // rock
                     // get the closest scissor
@@ -263,12 +263,10 @@ class AgentGeneric extends Agent {
                             closest_paper_from_scissor_dist = d
                             if (d < this.r) {
                                 // intersects
-
                                 this.collisionResolution(others[i])
                             }
                         }
                     }
-
                     // scissor meets rock -> scissor becomes rock
                     if (item.choice_code === 0) {
                         if (d < closest_rock_from_scissor_dist) {
@@ -284,27 +282,25 @@ class AgentGeneric extends Agent {
             }
         }
 
-        // for a source agent, I have calculated the nearest target
-        if (debug) {
-            if (closest_scissor_from_rock) {
-                this.drawLineUtil(closest_scissor_from_rock.userData, 'red')
-            }
-            if (closest_rock_from_paper) {
-                this.drawLineUtil(closest_rock_from_paper.userData, 'green')
-            }
-            if (closest_scissor_from_paper) {
-                this.drawLineUtil(closest_scissor_from_paper.userData, 'green')
-            }
-            if (closest_rock_from_scissor) {
-                this.drawLineUtil(closest_rock_from_scissor.userData, 'green')
-            }
-            if (closest_paper_from_scissor) {
-                this.drawLineUtil(closest_paper_from_scissor.userData, 'yellow')
-            }
-            if (closest_paper_from_rock) {
-                this.drawLineUtil(closest_paper_from_rock.userData, 'yellow')
-            }
-        }
+        this.moveTowardsTarget(closest_scissor_from_rock, "red")
+        this.moveTowardsTarget(closest_paper_from_rock, "blue")
+        this.moveTowardsTarget(closest_scissor_from_paper, "orange")
+        this.moveTowardsTarget(closest_rock_from_paper, "white")
+        this.moveTowardsTarget(closest_rock_from_scissor, "brown")
+        this.moveTowardsTarget(closest_paper_from_scissor, "green")
+    }
+
+    moveTowardsTarget(closest_dst_from_src, color) {
+        if (closest_dst_from_src) {
+            debug ? this.drawLineUtil(
+                closest_dst_from_src.userData, color) : null
+            let direction = p5.Vector.sub(
+                closest_dst_from_src.userData.position, this.position);
+            direction.setMag(1)
+            this.position.add(direction)
+            // I think something should happen to the velocity here too
+            // like target should inherit velocity of source ???
+        }        
     }
 
     // alternate version; not working
